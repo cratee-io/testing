@@ -21,7 +21,7 @@ use syn::parse_macro_input;
 use syn::ItemFn;
 
 use proc_macro::TokenStream;
-use regex::Regex;
+//use regex::Regex;
 
 #[cfg(test)]
 mod tests;
@@ -39,12 +39,19 @@ mod tests;
 /// @dev #[should_panic] and #[ignore] must comes after #[test] but not before
 #[proc_macro_attribute]
 pub fn test(_attr: TokenStream, input: TokenStream) -> TokenStream {
-    let tokens = input.to_string();
+    //use proc_macro::TokenTree;
+    //for v in input.clone() {
+    //    match v {
+    //        TokenTree::Group(v) => println!("group: {}", v),
+    //        TokenTree::Ident(v) => println!("id: {}", v),
+    //        TokenTree::Punct(v) => println!("punct: {}", v),
+    //        TokenTree::Literal(v) => println!("literal: {}", v),
+    //    }
+    //}
 
-    let (attrs, func) = match tokens.find("\nfn") {
-        Some(v) => tokens.split_at(v),
-        None => ("", tokens.as_str()),
-    };
+    let tokens = input.to_string();
+    let (attrs, func) = split_attrs_and_func(tokens.as_str());
+
     let attrs = canonicalize_attributes(attrs);
     let attrs = attrs.as_str();
 
@@ -92,38 +99,58 @@ fn canonicalize_attributes(attrs: &str) -> String {
     attrs.replace(r#"\""#, r#"""#)
 }
 
+// @dev assume attrs has been formatted
 fn figure_out_should_panic_and_ignored(attrs: &str) -> (Option<&str>, bool) {
-    const SHOULD_PANIC: &str = r#"#\[should_panic(\(expected\s*=\s*"((?s).*)"\))?\]"#;
-    const IGNORE: &str = r"#\[ignore\]";
+    const IGNORE: &str = "#[ignore]";
 
-    {
-        // case: #[ignore] follows #[should_panic(*)]
-        let should_panic_then_ignore = format!(r"^{}\s*({})?$", SHOULD_PANIC, IGNORE);
-        let pattern = Regex::new(&should_panic_then_ignore).unwrap();
+    let (attrs, ignored) = {
+        let attrs = attrs.trim();
+        if let Some(v) = attrs.strip_prefix(IGNORE) {
+            (v.trim_start(), true)
+        } else if let Some(v) = attrs.strip_suffix(IGNORE) {
+            (v.trim_end(), true)
+        } else {
+            (attrs, false)
+        }
+    };
 
-        if let Some(groups) = pattern.captures(attrs) {
-            let should_panic_expected = groups.get(2).map_or("", |m| m.as_str());
-            let ignored = groups.get(3).is_some();
+    let should_panic_expected = figure_out_should_panic(attrs);
 
-            return (Some(should_panic_expected), ignored);
+    return (should_panic_expected, ignored);
+}
+
+fn figure_out_should_panic(attrs: &str) -> Option<&str> {
+    const SHOULD_PANIC: &str = "#[should_panic]";
+    const EXPECTED_SHOULD_PANIC_PREFIX: &str = r#"#[should_panic(expected ="#;
+    const EXPECTED_SHOULD_PANIC_SUFFIX: &str = r#"")]"#;
+
+    if attrs == SHOULD_PANIC {
+        return Some("");
+    }
+
+    attrs
+        .strip_prefix(EXPECTED_SHOULD_PANIC_PREFIX)
+        .map(|v| v.trim_start())
+        //.map(|v| { println!("1. '{}'", v); v })
+        .map(|v| v.strip_prefix('"'))
+        .map(|v| v.expect("missing leading quote"))
+        //.map(|v| { println!("2. '{}'", v); v })
+        .map(|v| v.strip_suffix(EXPECTED_SHOULD_PANIC_SUFFIX))
+        .map(|v| v.expect("missing wrapping expected should_panic"))
+}
+
+fn split_attrs_and_func(tokens: &str) -> (&str, &str) {
+    if tokens.starts_with("fn ") {
+        return ("", tokens);
+    }
+
+    // @dev: actually this is buggy if attrs contains 'fn'. Possible solutions is to parse token
+    // tree manually.
+    for v in &["\nfn ", " fn\n", " fn "] {
+        if let Some(idx) = tokens.find(v) {
+            return tokens.split_at(idx);
         }
     }
 
-    {
-        // case: #[should_panic(*)] follows #[ignore]
-        let ignore_then_should_panic = format!(r"^{}\s*({})?$", IGNORE, SHOULD_PANIC);
-        let pattern = Regex::new(&ignore_then_should_panic).unwrap();
-
-        if let Some(groups) = pattern.captures(attrs) {
-            let should_panic_expected = if groups.get(1).is_some() {
-                Some(groups.get(2).map_or("", |m| m.as_str()))
-            } else {
-                None
-            };
-
-            return (should_panic_expected, true);
-        }
-    }
-
-    (None, false)
+    unreachable!();
 }

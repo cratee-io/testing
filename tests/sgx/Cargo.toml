@@ -1,0 +1,8 @@
+[workspace]
+
+exclude = ["third_party/rsgx-assets"]
+
+members = ["app", "enclave", "hello-world"]
+
+#[patch."https://github.com/apache/teaclave-sgx-sdk.git"]
+#sgx_tstd = { git = "https://hub.fastgit.org/apache/teaclave-sgx-sdk" }

@@ -14,10 +14,6 @@ testing =  { path = "../../..", optional = true }
 
 [dependencies.sgx_tstd]
 git = "https://github.com/apache/teaclave-sgx-sdk"
-rev = "v1.1.2"
-
-[dependencies.regex]
-git = "https://github.com/mesalock-linux/regex-sgx"
 
 [features]
 default = []

@@ -1,0 +1,10 @@
+[package]
+name = "rsgx-assets"
+version = "0.1.0"
+authors = ["sammyne <lixiangmin01@baidu.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+sgx_edl = { git = "https://hub.fastgit.org/apache/teaclave-sgx-sdk" }

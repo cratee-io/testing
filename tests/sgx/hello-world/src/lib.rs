@@ -30,7 +30,7 @@ pub mod tests {
     #[ignore]
     #[should_panic]
     fn it_ignore_even_should_panic() {
-        panic!("I'm panicking but ignored");
+        panic!("I'm ignore even panicking");
     }
 
     #[test]
@@ -39,11 +39,6 @@ pub mod tests {
             "hello-world-hello-world-hello-world-hello-world",
             "hello-world-hello-world-hello-world-hello-world"
         );
-    }
-
-    #[test]
-    fn test_conflicting_regex() {
-        let _ = regex::Regex::new("1");
     }
 }
 

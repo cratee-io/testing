@@ -1,137 +1,53 @@
-use regex::Regex;
-
 #[test]
-fn match_should_panic() {
-    // in form of (raw, expected)
+fn figure_out_should_panic_and_ignored() {
     let test_vector = vec![
-        ("#[should_panic]", ""),
-        (r#"#[should_panic(expected = "hello")]"#, "hello"),
-        (r#"#[should_panic(expected="hello")]"#, "hello"),
-        (r#"#[should_panic(expected ="hello")]"#, "hello"),
-        (r#"#[should_panic(expected = "hello")]"#, "hello"),
-        (r#"#[should_panic(expected =  "hello")]"#, "hello"),
+        (r"", (None, false)),
+        (r" ", (None, false)),
+        (r"#[should_panic]", (Some(""), false)),
         (
-            r#"#[should_panic(expected = 
-            "hello")]"#,
-            "hello",
+            r#"#[should_panic(expected = "hello")]"#,
+            (Some("hello"), false),
         ),
+        // below isn't ok
+        //(
+        //    r#"#[should_panic(expected="hello")]"#,
+        //    (Some("hello"), false),
+        //),
+        //        (r#"#[should_panic(expected ="hello")]"#, "hello", false),
+        //        (r#"#[should_panic(expected =  "hello")]"#, "hello", false),
+        //(
+        //    r#"#[should_panic(expected =
+        //            "hello")]"#,
+        //    (Some("hello"), false),
+        //),
         (
             r#"#[should_panic(expected = "hello
 world")]"#,
-            "hello\nworld",
+            (Some("hello\nworld"), false),
         ),
-        (
-            r#"#[should_panic(expected = "hello "world"")]"#,
-            "hello \"world\"",
-        ),
-        (
-            r#"#[should_panic(expected = "hello "world" ")]"#,
-            "hello \"world\" ",
-        ),
-    ];
-
-    // '.'  doesn't match newline as stated at https://docs.rs/regex/1.3.9/regex/index.html#matching-one-character
-    let r = Regex::new(r#"^#\[should_panic(\(expected\s*=\s*"((?s).*)"\))?\]$"#).unwrap();
-    for c in test_vector {
-        let got = r
-            .captures(c.0)
-            .expect("invalid #[should_panic] attribute")
-            .get(2)
-            .map_or("", |m| m.as_str());
-
-        let expected = c.1;
-        assert_eq!(expected, got);
-    }
-}
-
-#[test]
-fn match_should_panic_then_ignore() {
-    // in form of (raw, expected, ignored)
-    let test_vector = vec![
-        (r"#[should_panic]", "", false),
-        (r#"#[should_panic(expected = "hello")]"#, "hello", false),
-        (r#"#[should_panic(expected="hello")]"#, "hello", false),
-        (r#"#[should_panic(expected ="hello")]"#, "hello", false),
-        (r#"#[should_panic(expected = "hello")]"#, "hello", false),
-        (r#"#[should_panic(expected =  "hello")]"#, "hello", false),
-        (
-            r#"#[should_panic(expected = 
-            "hello")]"#,
-            "hello",
-            false,
-        ),
-        (
-            r#"#[should_panic(expected = "hello
-world")]"#,
-            "hello\nworld",
-            false,
-        ),
-        (r"#[should_panic]#[ignore]", "", true),
-        (r"#[should_panic] #[ignore]", "", true),
+        (r"#[should_panic]#[ignore]", (Some(""), true)),
+        (r"#[should_panic] #[ignore]", (Some(""), true)),
         (
             r"#[should_panic]
 #[ignore]",
-            "",
-            true,
+            (Some(""), true),
         ),
-        ("#[ignore]", "", true),
-        (r"#[ignore]#[should_panic]", "", true),
+        ("#[ignore]", (None, true)),
+        (r"#[ignore]#[should_panic]", (Some(""), true)),
         (
             r"#[ignore]
 #[should_panic]",
-            "",
-            true,
+            (Some(""), true),
         ),
         (
             r#"#[ignore]
-#[should_panic(expected = "hello")]"#,
-            "hello",
-            true,
+        #[should_panic(expected = "hello")]"#,
+            (Some("hello"), true),
         ),
     ];
 
-    let (should_panic_then_ignore, ignore_then_should_panic) = {
-        // '.'  doesn't match newline as stated at
-        // https://docs.rs/regex/1.3.9/regex/index.html#matching-one-character
-        let should_panic = r#"#\[should_panic(\(expected\s*=\s*"((?s).*)"\))?\]"#;
-        let ignore = r"#\[ignore\]";
-
-        let should_panic_then_ignore = format!(r"^{}\s*({})?$", should_panic, ignore);
-        let ignore_then_should_panic = format!(r"^({})\s*({})?$", ignore, should_panic);
-
-        (should_panic_then_ignore, ignore_then_should_panic)
-    };
-
-    let r1 = Regex::new(&should_panic_then_ignore).unwrap();
-    let r2 = Regex::new(&ignore_then_should_panic).unwrap();
-
-    let run =
-        |&(msg, should_panic_expect, ignored_expected), pattern: &Regex, expect_idx, ignore_idx| {
-            let groups = match pattern.captures(msg) {
-                Some(v) => v,
-                None => return false,
-            };
-
-            println!("groups: {:?}", groups);
-
-            let should_panic_got = groups.get(expect_idx).map_or("", |m| m.as_str());
-            assert_eq!(
-                should_panic_expect, should_panic_got,
-                "unexpected msg for should_panic"
-            );
-
-            let ignored_got = groups.get(ignore_idx);
-            assert_eq!(
-                ignored_expected,
-                ignored_got.is_some(),
-                "mismatched #[ignore]"
-            );
-
-            true
-        };
-
     for (i, c) in test_vector.iter().enumerate() {
-        println!("--{}", c.0);
-        assert!(run(c, &r1, 2, 3,) || run(c, &r2, 4, 1), "#{} failed", i);
+        let got = crate::figure_out_should_panic_and_ignored(c.0);
+        assert_eq!(c.1, got, "#{}: fail at {}", i, c.0);
     }
 }

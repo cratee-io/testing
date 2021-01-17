@@ -2,16 +2,16 @@ name: build
 
 on:
   push:
-    branches: [ 'master', 'rsgx1.1.2' ]
+    branches: [ 'main' ]
   pull_request:
-    branches: [ 'master', 'rsgx1.1.2' ]
+    branches: [ 'main' ]
 
 jobs:
   test:
 
     runs-on: ubuntu-18.04
     container: 
-      image: baiduxlab/sgx-rust:1804-1.1.2
+      image: sammyne/rsgx-dcap:2.12.100.3-dcap1.9.100.3-rs20201025-ubuntu18.04
 
     steps:
     - uses: actions/checkout@v2
@@ -40,7 +40,7 @@ jobs:
     - name: Run tests
       run: |
         . ~/.cargo/env && 
-        . /opt/sgxsdk/environment && 
+        . /opt/intel/sgxsdk/environment && 
         mkdir tests/sgx/build &&
         cd tests/sgx/build &&
         cmake .. && 

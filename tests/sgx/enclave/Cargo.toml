@@ -11,7 +11,7 @@ crate-type = ["staticlib"]
 default = []
 
 [dependencies]
-sgx_tstd  = { git = "https://github.com/apache/teaclave-sgx-sdk", rev = "v1.1.2" }
+sgx_tstd  = { git = "https://github.com/apache/teaclave-sgx-sdk" }
 
 [dependencies.wheel]
 package = "hello-world"

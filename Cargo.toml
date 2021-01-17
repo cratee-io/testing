@@ -18,4 +18,3 @@ testing_proc_macro = { path = "./proc_macro" }
 features = ["backtrace"]
 git = "https://github.com/apache/teaclave-sgx-sdk"
 optional = true
-rev = "v1.1.2"

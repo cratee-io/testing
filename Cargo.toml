@@ -1,10 +1,11 @@
 [package]
 name = "testing"
-version = "0.1.0"
-authors = ["Teaclave Contributors <dev@teaclave.apache.org>"]
+version = "0.2.0"
+authors = ["sammyne xiangminli@alumni.sjtu.edu.cn"]
 description = "Teaclave test utility"
-license = "Apache-2.0"
+license-file = "Apache-2.0"
 edition = "2018"
+publish = false
 
 [features]
 default = ["sgx"]
@@ -13,9 +14,9 @@ sgx = ["sgx_tstd"]
 [dependencies]
 inventory           = "=0.1.10"
 inventory-impl      = { path = "third_party/inventory-impl" }
-testing_proc_macro  = { path = "./proc_macro" }
+testing_proc_macro  = { path = "proc_macro" }
 
 [dependencies.sgx_tstd]
-features = ["backtrace"]
-git = "https://github.com/apache/teaclave-sgx-sdk"
-optional = true
+features  = ["backtrace"]
+git       = "https://github.com/apache/teaclave-sgx-sdk"
+optional  = true

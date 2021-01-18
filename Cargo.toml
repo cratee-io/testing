@@ -11,8 +11,9 @@ default = ["sgx"]
 sgx = ["sgx_tstd"]
 
 [dependencies]
-inventory   = "0.1.6"
-testing_proc_macro = { path = "./proc_macro" }
+inventory           = "=0.1.10"
+inventory-impl      = { path = "third_party/inventory-impl" }
+testing_proc_macro  = { path = "./proc_macro" }
 
 [dependencies.sgx_tstd]
 features = ["backtrace"]

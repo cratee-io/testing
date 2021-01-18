@@ -23,7 +23,12 @@ extern crate sgx_tstd as std;
 use std::string::String;
 use std::vec::Vec;
 
+pub use inventory;
+pub use inventory_impl;
+
 pub use testing_proc_macro::test;
+
+mod macros;
 
 pub struct TestCase {
     pub id: String,

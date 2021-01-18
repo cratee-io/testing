@@ -9,7 +9,6 @@ edition = "2018"
 [dependencies]
 
 # dependencies for testing
-inventory   = { version = "0.1.6", optional = true }
 testing =  { path = "../../..", optional = true }
 
 [dependencies.sgx_tstd]
@@ -17,4 +16,4 @@ git = "https://github.com/apache/teaclave-sgx-sdk"
 
 [features]
 default = []
-with-testing = ["inventory", "testing"]
+with-testing = ["testing"]

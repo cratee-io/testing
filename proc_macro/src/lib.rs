@@ -50,6 +50,7 @@ pub fn test(_attr: TokenStream, input: TokenStream) -> TokenStream {
     //}
 
     let tokens = input.to_string();
+    //println!("tokens: {}",tokens);
     let (attrs, func) = split_attrs_and_func(tokens.as_str());
 
     let attrs = canonicalize_attributes(attrs);
@@ -77,7 +78,7 @@ pub fn test(_attr: TokenStream, input: TokenStream) -> TokenStream {
 
         #with_testing_gate
 
-        inventory::submit!(
+        testing::submit!(
             testing::TestCase::new(
                 concat!(module_path!(), "::", stringify!(#f_ident)),
                 #f_ident,
@@ -87,7 +88,7 @@ pub fn test(_attr: TokenStream, input: TokenStream) -> TokenStream {
         );
     );
 
-    //println!("{}", q);
+    // println!("{}", q);
 
     q.into()
 }

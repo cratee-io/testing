@@ -13,8 +13,11 @@ sgx = ["sgx_tstd"]
 
 [dependencies]
 inventory           = "=0.1.10"
-inventory-impl      = { path = "third_party/inventory-impl" }
 testing_proc_macro  = { path = "proc_macro" }
+
+[dependencies.inventory-impl]
+package = "inventory-impl-for-testonly"
+path    = "third_party/inventory-impl-for-testonly"
 
 [dependencies.sgx_tstd]
 features  = ["backtrace"]

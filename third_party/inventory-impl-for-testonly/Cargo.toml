@@ -1,5 +1,5 @@
 [package]
-name = "inventory-impl"
+name = "inventory-impl-for-testonly"
 version = "0.1.10"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 license = "MIT OR Apache-2.0"
